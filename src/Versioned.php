@@ -74,6 +74,27 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const DRAFT = 'Stage';
 
     /**
+     * A cache for the draft status of given objects
+     *
+     * @var array
+     */
+    protected $cacheIsDraft = [];
+
+    /**
+     * A cache for the published status of given objects
+     * @var array
+     */
+    protected $cacheIsPublished = [];
+
+    /**
+     * A cache for the latest published datetime of given objects
+     * @var array
+     */
+    protected $cacheLatestPublished = [];
+
+    protected $cacheStagesDiffer = [];
+
+    /**
      * A cache used by get_versionnumber_by_stage().
      * Clear through {@link flushCache()}.
      *
@@ -1441,15 +1462,23 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         // Get the root data object class - this will have the version field
         $owner = $this->owner;
-        $draftTable = $this->baseTable();
-        $liveTable = $this->stageTable($draftTable, static::LIVE);
+        $id = $owner->ID;
+        $class = get_class($this->owner);
 
-        return DB::prepared_query(
-            "SELECT \"$draftTable\".\"Version\" = \"$liveTable\".\"Version\" FROM \"$draftTable\"
-			 INNER JOIN \"$liveTable\" ON \"$draftTable\".\"ID\" = \"$liveTable\".\"ID\"
-			 WHERE \"$draftTable\".\"ID\" = ?",
-            [$owner->ID]
-        )->value();
+        $key = "{$class}#{$id}";
+
+        if (!isset($this->cacheLatestPublished[$key])) {
+            $draftTable = $this->baseTable();
+            $liveTable = $this->stageTable($draftTable, static::LIVE);
+
+            $this->cacheLatestPublished[$key] = DB::prepared_query(
+                "SELECT \"$draftTable\".\"Version\" = \"$liveTable\".\"Version\" FROM \"$draftTable\"
+                 INNER JOIN \"$liveTable\" ON \"$draftTable\".\"ID\" = \"$liveTable\".\"ID\"
+                 WHERE \"$draftTable\".\"ID\" = ?",
+                [$id]
+            )->value();
+        }
+        return $this->cacheLatestPublished[$key];
     }
 
     /**
@@ -1844,18 +1873,22 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return true;
         }
 
-        // We test for equality - if one of the versions doesn't exist, this
-        // will be false.
+        $class = get_class($this->owner);
+        $key = "{$class}#{$stage1}#{$stage2}#{$id}";
+        if (!isset($this->cacheStagesDiffer[$key])) {
+            // We test for equality - if one of the versions doesn't exist, this
+            // will be false.
 
-        // TODO: DB Abstraction: if statement here:
-        $stagesAreEqual = DB::prepared_query(
-            "SELECT CASE WHEN \"$table1\".\"Version\"=\"$table2\".\"Version\" THEN 1 ELSE 0 END
-			 FROM \"$table1\" INNER JOIN \"$table2\" ON \"$table1\".\"ID\" = \"$table2\".\"ID\"
-			 AND \"$table1\".\"ID\" = ?",
-            [$id]
-        )->value();
+            // TODO: DB Abstraction: if statement here:
+            $this->cacheStagesDiffer[$key] = !DB::prepared_query(
+                "SELECT CASE WHEN \"$table1\".\"Version\"=\"$table2\".\"Version\" THEN 1 ELSE 0 END
+            FROM \"$table1\" INNER JOIN \"$table2\" ON \"$table1\".\"ID\" = \"$table2\".\"ID\"
+            AND \"$table1\".\"ID\" = ?",
+                [$id]
+            )->value();
+        }
 
-        return !$stagesAreEqual;
+        return $this->cacheStagesDiffer[$key];
     }
 
     /**
@@ -2407,12 +2440,17 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return true;
         }
 
-        $table = $this->baseTable(static::LIVE);
-        $result = DB::prepared_query(
-            "SELECT COUNT(*) FROM \"{$table}\" WHERE \"{$table}\".\"ID\" = ?",
-            [$id]
-        );
-        return (bool)$result->value();
+        $class = get_class($this->owner);
+        $key = "{$class}#{$id}";
+        if (!isset($this->cacheIsPublished[$key])) {
+            $table = $this->baseTable(static::LIVE);
+            $result = DB::prepared_query(
+                "SELECT COUNT(*) FROM \"{$table}\" WHERE \"{$table}\".\"ID\" = ?",
+                [$id]
+            );
+            $this->cacheIsPublished[$key] = (bool)$result->value();
+        }
+        return $this->cacheIsPublished[$key];
     }
 
     /**
@@ -2438,12 +2476,17 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return false;
         }
 
-        $table = $this->baseTable();
-        $result = DB::prepared_query(
-            "SELECT COUNT(*) FROM \"{$table}\" WHERE \"{$table}\".\"ID\" = ?",
-            [$id]
-        );
-        return (bool)$result->value();
+        $class = get_class($this->owner);
+        $key = "{$class}#{$id}";
+        if (!isset($this->cacheIsDraft[$key])) {
+            $table = $this->baseTable();
+            $result = DB::prepared_query(
+                "SELECT COUNT(*) FROM \"{$table}\" WHERE \"{$table}\".\"ID\" = ?",
+                [$id]
+            );
+            $this->cacheIsDraft[$key] = (bool)$result->value();
+        }
+        return $this->cacheIsDraft[$key];
     }
 
     /**
@@ -2575,6 +2618,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         self::$cache_versionnumber = [];
         $this->versionModifiedCache = [];
+        $this->cacheIsDraft = [];
+        $this->cacheIsPublished = [];
+        $this->cacheLatestPublished = [];
     }
 
     /**
