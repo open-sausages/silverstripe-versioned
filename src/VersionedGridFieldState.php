@@ -3,13 +3,13 @@
 namespace SilverStripe\Versioned\VersionedGridFieldState;
 
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridField_ColumnProvider;
+use SilverStripe\Forms\GridField\GridFieldColumnProvider;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Core\Convert;
 use SilverStripe\View\HTML;
 
-class VersionedGridFieldState implements GridField_ColumnProvider
+class VersionedGridFieldState implements GridFieldColumnProvider
 {
     /**
      * @var string

@@ -8,11 +8,11 @@ use SilverStripe\Core\Extensible;
 use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\ArrayListInterface;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\ORM\ListInterface;
 use SilverStripe\ORM\UnexpectedDataException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -212,7 +212,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     /**
      * Get all implicit objects for this change
      *
-     * @return SS_List
+     * @return ListInterface
      */
     public function findReferenced()
     {
@@ -226,7 +226,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         // If we have deleted this record, recursively delete live objects on publish
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
             if (!$liveRecord) {
-                return ArrayList::create();
+                return ArrayListInterface::create();
             }
             return $liveRecord->findCascadeDeletes(true);
         }
@@ -235,7 +235,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         /** @var DataObject|RecursivePublishable $draftRecord */
         $draftRecord = $this->getObjectInStage(Versioned::DRAFT);
         if (!$draftRecord) {
-            return ArrayList::create();
+            return ArrayListInterface::create();
         }
         $references = $draftRecord->findOwned();
 
@@ -244,7 +244,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
             foreach ($liveRecord->findCascadeDeletes(true) as $next) {
                 /** @var Versioned|DataObject $next */
                 if ($next->hasExtension(Versioned::class) && $next->hasStages() && $next->isOnLiveOnly()) {
-                    $this->mergeRelatedObject($references, ArrayList::create(), $next);
+                    $this->mergeRelatedObject($references, ArrayListInterface::create(), $next);
                 }
             }
         }

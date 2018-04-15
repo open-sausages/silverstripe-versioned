@@ -7,9 +7,9 @@ use SilverStripe\Core\Convert;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
-use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
+use SilverStripe\Forms\GridField\GridFieldDetailFormItemRequest;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\ArrayListInterface;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\ValidationResult;
@@ -18,13 +18,13 @@ use SilverStripe\View\ArrayData;
 /**
  * Provides versioned dataobject support to {@see GridFieldDetailForm_ItemRequest}
  *
- * @property GridFieldDetailForm_ItemRequest $owner
+ * @property GridFieldDetailFormItemRequest $owner
  */
-class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
+class VersionedGridFieldItemRequest extends GridFieldDetailFormItemRequest
 {
     /**
      * @param bool $unlinked
-     * @return ArrayList
+     * @return ArrayListInterface
      */
     public function Breadcrumbs($unlinked = false)
     {

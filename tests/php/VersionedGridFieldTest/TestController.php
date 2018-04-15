@@ -7,7 +7,7 @@ use SilverStripe\Dev\TestOnly;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
+use SilverStripe\Forms\GridField\GridFieldConfigRelationEditor;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use SilverStripe\Versioned\Versioned;
 
@@ -43,7 +43,7 @@ class TestController extends Controller implements TestOnly
     {
         $objects = TestObject::get()
             ->sort('"VersionedTest_DataObject"."ID" ASC');
-        $field = new GridField('testfield', 'testfield', $objects, GridFieldConfig_RelationEditor::create());
+        $field = new GridField('testfield', 'testfield', $objects, GridFieldConfigRelationEditor::create());
         return new Form($this, 'Form', new FieldList($field), new FieldList());
     }
 }

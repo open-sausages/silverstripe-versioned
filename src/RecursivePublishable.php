@@ -6,7 +6,7 @@ namespace SilverStripe\Versioned;
 use LogicException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\ArrayListInterface;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
@@ -101,8 +101,8 @@ class RecursivePublishable extends DataExtension
      * Note that objects will only be searched in the same stage as the given record.
      *
      * @param bool $recursive True if recursive
-     * @param ArrayList $list Optional list to add items to
-     * @return ArrayList list of objects
+     * @param ArrayListInterface $list Optional list to add items to
+     * @return ArrayListInterface list of objects
      */
     public function findOwned($recursive = true, $list = null)
     {
@@ -115,13 +115,13 @@ class RecursivePublishable extends DataExtension
      * Note that objects will only be searched in the same stage as the given record.
      *
      * @param bool $recursive True if recursive
-     * @param ArrayList $list Optional list to add items to
-     * @return ArrayList list of objects
+     * @param ArrayListInterface $list Optional list to add items to
+     * @return ArrayListInterface list of objects
      */
     public function findOwners($recursive = true, $list = null)
     {
         if (!$list) {
-            $list = new ArrayList();
+            $list = new ArrayListInterface();
         }
 
         // Build reverse lookup for ownership
@@ -137,9 +137,9 @@ class RecursivePublishable extends DataExtension
      * Note that objects will only be searched in the same stage as the given record.
      *
      * @param bool $recursive True if recursive
-     * @param ArrayList $list List to add items to
+     * @param ArrayListInterface $list List to add items to
      * @param array $lookup List of reverse lookup rules for owned objects
-     * @return ArrayList list of objects
+     * @return ArrayListInterface list of objects
      */
     public function findOwnersRecursive($recursive, $list, $lookup)
     {

@@ -13,7 +13,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\ArrayListInterface;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
@@ -418,7 +418,7 @@ class VersionedTest extends SapphireTest
                 'Page 2a',
                 'Page 2b',
             ],
-            ArrayList::create($cs1->Changes()->toArray())
+            ArrayListInterface::create($cs1->Changes()->toArray())
                 ->sort('Title')
                 ->column('Title')
         );
@@ -436,7 +436,7 @@ class VersionedTest extends SapphireTest
                 'Page 2b',
                 'Page 3'
             ],
-            ArrayList::create($cs2->Changes()->toArray())
+            ArrayListInterface::create($cs2->Changes()->toArray())
                 ->sort('Title')
                 ->column('Title')
         );
@@ -449,7 +449,7 @@ class VersionedTest extends SapphireTest
                 'Page 2a',
                 'Page 2b',
             ],
-            ArrayList::create($cs1->Changes()->toArray())
+            ArrayListInterface::create($cs1->Changes()->toArray())
                 ->sort('Title')
                 ->column('Title')
         );
@@ -464,7 +464,7 @@ class VersionedTest extends SapphireTest
                 'Page 2a',
                 'Page 3'
             ],
-            ArrayList::create($cs2->Changes()->toArray())
+            ArrayListInterface::create($cs2->Changes()->toArray())
                 ->sort('Title')
                 ->column('Title')
         );
