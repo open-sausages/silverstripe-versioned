@@ -5,7 +5,7 @@ namespace SilverStripe\Versioned;
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ArrayListInterface;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\View\ArrayData;
 use SilverStripe\View\Parsers\Diff;
@@ -208,7 +208,7 @@ class DataDifferencer extends ViewableData
      */
     public function ChangedFields()
     {
-        $changedFields = new ArrayListInterface();
+        $changedFields = new ArrayList();
 
         if ($this->fromRecord) {
             $base = $this->fromRecord;

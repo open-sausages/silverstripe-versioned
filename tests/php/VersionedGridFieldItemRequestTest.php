@@ -9,7 +9,7 @@ use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\ORM\ArrayListInterface;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedOwner;
@@ -131,7 +131,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $controller = new TestController();
         $parentForm = new Form($controller, 'Form', new FieldList(), new FieldList());
         return new VersionedGridFieldItemRequest(
-            GridField::create('test', 'test', new ArrayListInterface())
+            GridField::create('test', 'test', new ArrayList())
                 ->setForm($parentForm),
             new GridFieldDetailForm(),
             $obj,

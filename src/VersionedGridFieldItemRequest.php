@@ -9,7 +9,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailFormItemRequest;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\ORM\ArrayListInterface;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\ValidationResult;
@@ -24,7 +24,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailFormItemRequest
 {
     /**
      * @param bool $unlinked
-     * @return ArrayListInterface
+     * @return ArrayList
      */
     public function Breadcrumbs($unlinked = false)
     {
