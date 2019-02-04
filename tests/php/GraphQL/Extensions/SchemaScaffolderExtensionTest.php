@@ -20,7 +20,21 @@ class SchemaScaffolderExtensionTest extends SapphireTest
         Fake::class,
     ];
 
-    public function testSchemaScaffolderEnsuresMemberType()
+    public function testMemberTypeNotCreatedByDefault()
+    {
+        $manager = new Manager();
+        $manager->addType((new VersionedStage())->toType());
+        $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
+        $this->assertFalse($manager->hasType($memberType));
+
+        $scaffolder = new SchemaScaffolder(); // not setting setUseVersionedFilter(true)
+        $scaffolder->type(Fake::class);
+        $scaffolder->addToManager($manager);
+
+        $this->assertFalse($manager->hasType($memberType));
+    }
+
+    public function testMemberTypeCreatedWithOptInForVersionedObjects()
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
@@ -28,16 +42,24 @@ class SchemaScaffolderExtensionTest extends SapphireTest
         $this->assertFalse($manager->hasType($memberType));
 
         $scaffolder = new SchemaScaffolder();
+        $scaffolder->setUseVersionedMetadata(true);
+        $scaffolder->setUseVersionedFilter(true);
         $scaffolder->type(Fake::class);
         $scaffolder->addToManager($manager);
 
         $this->assertTrue($manager->hasType($memberType));
         $this->assertInstanceOf(ObjectType::class, $manager->getType($memberType));
+    }
 
+    public function testMemberTypeNotCreatedWithOptInForUnversionedObjects()
+    {
+        $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
         $manager = new Manager();
         $this->assertFalse($manager->hasType($memberType));
 
         $scaffolder = new SchemaScaffolder();
+        $scaffolder->setUseVersionedMetadata(true);
+        $scaffolder->setUseVersionedFilter(true);
         $scaffolder->type(UnversionedWithField::class);
         $scaffolder->addToManager($manager);
         $this->assertFalse($manager->hasType($memberType));

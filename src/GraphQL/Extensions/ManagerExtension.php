@@ -22,10 +22,13 @@ class ManagerExtension extends Extension
             $config['types'] = [];
         }
 
-        $config['types']['VersionedStage'] = VersionedStage::class;
-        $config['types']['VersionedStatus'] = VersionedStatus::class;
-        $config['types']['VersionedQueryMode'] = VersionedQueryMode::class;
-        $config['types']['VersionedInputType'] = VersionedInputType::class;
-        $config['types']['CopyToStageInputType'] = CopyToStageInputType::class;
+        // Allow schemas to opt out of versioning (defaults to false when not set)
+        if (!isset($config['useVersionedFilter']) || !(bool)$config['useVersionedFilter']) {
+            $config['types']['VersionedStage'] = VersionedStage::class;
+            $config['types']['VersionedStatus'] = VersionedStatus::class;
+            $config['types']['VersionedQueryMode'] = VersionedQueryMode::class;
+            $config['types']['VersionedInputType'] = VersionedInputType::class;
+            $config['types']['CopyToStageInputType'] = CopyToStageInputType::class;
+        }
     }
 }

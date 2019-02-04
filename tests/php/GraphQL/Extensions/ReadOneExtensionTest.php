@@ -26,6 +26,8 @@ class ReadOneExtensionTest extends SapphireTest
         $manager->addType((new VersionedInputType())->toType());
         $manager->addType(new ObjectType(['name' => StaticSchema::inst()->typeNameForDataObject(Fake::class)]));
         $read = new ReadOne(Fake::class);
+        $read->setUseVersionedFilter(true);
+
         $readScaffold = $read->scaffold($manager);
         $this->assertInternalType('callable', $readScaffold['resolve']);
         $doResolve = function ($mode, $ID, $version = null) use ($readScaffold) {

@@ -15,6 +15,56 @@ use SilverStripe\Versioned\Versioned;
 class DataObjectScaffolderExtension extends Extension
 {
     /**
+     * @var bool
+     */
+    protected $useVersionedFilter = false;
+
+    /**
+     * @var bool
+     */
+    protected $useVersionedMetadata = false;
+
+    /**
+     * @return bool
+     */
+    public function getUseVersionedFilter()
+    {
+        return $this->useVersionedFilter;
+    }
+
+    /**
+     * @param bool $useVersionedFilter
+     */
+    public function setUseVersionedFilter($useVersionedFilter)
+    {
+        $this->useVersionedFilter = $useVersionedFilter;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getUseVersionedMetadata()
+    {
+        return $this->useVersionedMetadata;
+    }
+
+    /**
+     * @param bool $useVersionedMetadata
+     */
+    public function setUseVersionedMetadata($useVersionedMetadata)
+    {
+        $this->useVersionedMetadata = $useVersionedMetadata;
+    }
+
+    public function onAfterOperation($operation)
+    {
+        // Defined on ReadExtension
+        if ($operation->hasExtension(ReadExtension::class)) {
+            $operation->setUseVersionedFilter($this->getUseVersionedFilter());
+        }
+    }
+
+    /**
      * Adds the "Version" and "Versions" fields to any dataobject that has the Versioned extension.
      * @param Manager $manager
      */
@@ -25,9 +75,15 @@ class DataObjectScaffolderExtension extends Extension
         $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
         $instance = $owner->getDataObjectInstance();
         $class = $owner->getDataObjectClass();
+
         if (!$instance->hasExtension(Versioned::class)) {
             return;
         }
+
+        if (!$this->getUseVersionedMetadata()) {
+            return;
+        }
+
         /* @var ObjectType $rawType */
         $rawType = $owner->scaffold($manager);
 

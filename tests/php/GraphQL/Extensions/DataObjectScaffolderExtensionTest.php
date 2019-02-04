@@ -17,11 +17,29 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         Fake::class,
     ];
 
-    public function testDataObjectScaffolderAddsVersionedFields()
+    public function testDataObjectScaffolderDoesNotAddVersionedFieldsByDefault()
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
         $scaffolder = new DataObjectScaffolder(Fake::class);
+        $scaffolder->addFields(['Name', 'Title']);
+        $scaffolder->addToManager($manager);
+        $typeName = $scaffolder->getTypeName();
+
+        $type = $manager->getType($typeName);
+        $this->assertInstanceOf(ObjectType::class, $type);
+        $fields = $type->config['fields']();
+        $this->assertArrayNotHasKey('Version', $fields);
+        $this->assertArrayNotHasKey('Versions', $fields);
+    }
+
+    public function testDataObjectScaffolderAddsVersionedFieldsWithOptIn()
+    {
+        $manager = new Manager();
+        $manager->addType((new VersionedStage())->toType());
+        $scaffolder = new DataObjectScaffolder(Fake::class);
+        $scaffolder->setUseVersionedFilter(true);
+        $scaffolder->setUseVersionedMetadata(true);
         $scaffolder->addFields(['Name', 'Title']);
         $scaffolder->addToManager($manager);
         $typeName = $scaffolder->getTypeName();
@@ -35,12 +53,14 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         $this->assertInstanceOf(ObjectType::class, $fields['Versions']['type']);
     }
 
-    public function testDataObjectScaffolderDoesntAddVersionedFieldsToUnversionedObjects()
+    public function testDataObjectScaffolderDoesntAddVersionedFieldsToUnversionedObjectsWithOptIn()
     {
         Fake::remove_extension(Versioned::class);
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
         $scaffolder = new DataObjectScaffolder(UnversionedWithField::class);
+        $scaffolder->setUseVersionedFilter(true);
+        $scaffolder->setUseVersionedMetadata(true);
         $scaffolder->addToManager($manager);
         $typeName = $scaffolder->getTypeName();
 
