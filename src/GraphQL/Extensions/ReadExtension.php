@@ -17,8 +17,33 @@ use SilverStripe\GraphQL\Manager;
  */
 class ReadExtension extends Extension
 {
+    /**
+     * @var bool
+     */
+    protected $useVersionedFilter = false;
+
+    /**
+     * @return bool
+     */
+    public function getUseVersionedFilter()
+    {
+        return $this->useVersionedFilter;
+    }
+
+    /**
+     * @param bool $useVersionedFilter
+     */
+    public function setUseVersionedFilter($useVersionedFilter)
+    {
+        $this->useVersionedFilter = $useVersionedFilter;
+    }
+
     public function updateList(DataList &$list, $args)
     {
+        if (!$this->getUseVersionedFilter()) {
+            return;
+        }
+
         if (!isset($args['Versioning'])) {
             return;
         }
@@ -33,6 +58,10 @@ class ReadExtension extends Extension
      */
     public function updateArgs(&$args, Manager $manager)
     {
+        if (!$this->getUseVersionedFilter()) {
+            return;
+        }
+
         $args['Versioning'] = [
             'type' => $manager->getType('VersionedInputType'),
         ];
