@@ -2,18 +2,26 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use Exception;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Extension;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\Versioned;
 
 class DataObjectScaffolderExtension extends Extension
 {
+    /**
+     * @var string
+     */
+    protected $versionInterfaceName = 'VersionInterface';
+
     /**
      * Adds the "Version" and "Versions" fields to any dataobject that has the Versioned extension.
      * @param Manager $manager
@@ -28,53 +36,35 @@ class DataObjectScaffolderExtension extends Extension
         if (!$instance->hasExtension(Versioned::class)) {
             return;
         }
+
         /* @var ObjectType $rawType */
         $rawType = $owner->scaffold($manager);
 
+        /** @var InterfaceType $rawVersionInterfaceType */
+        $rawVersionInterfaceType = $manager->getType('VersionInterface');
+
         $versionName = $this->createVersionedTypeName($class);
         $coreFieldsFn = $rawType->config['fields'];
+        $versionFieldsFn = $rawVersionInterfaceType->config['fields'];
+
         // Create the "version" type for this dataobject. Takes the original fields
         // and augments them with the Versioned_Version specific fields
         $versionType = new ObjectType([
             'name' => $versionName,
-            'fields' => function () use ($coreFieldsFn, $manager, $memberType) {
+            'fields' => function () use ($coreFieldsFn, $versionFieldsFn, $manager, $memberType) {
                 $coreFields = $coreFieldsFn();
-                $versionFields = [
-                    'Author' => [
-                        'type' => $manager->getType($memberType),
-                        'resolve' => function ($obj) {
-                            return $obj->Author();
-                        }
-                    ],
-                    'Publisher' => [
-                        'type' => $manager->getType($memberType),
-                        'resolve' => function ($obj) {
-                            return $obj->Publisher();
-                        }
-                    ],
-                    'Published' => [
-                        'type' => Type::boolean(),
-                        'resolve' => function ($obj) {
-                            return $obj->WasPublished;
-                        }
-                    ],
-                    'LiveVersion' => [
-                        'type' => Type::boolean(),
-                        'resolve' => function ($obj) {
-                            return $obj->isLiveVersion();
-                        }
-                    ],
-                    'LatestDraftVersion' => [
-                        'type' => Type::boolean(),
-                        'resolve' => function ($obj) {
-                            return $obj->isLatestDraftVersion();
-                        }
-                    ],
-                ];
+                $versionFields = $versionFieldsFn();
+
                 // Remove this recursive madness.
                 unset($coreFields['Versions']);
 
                 return array_merge($coreFields, $versionFields);
+            },
+            'interfaces' => function() use ($rawType, $manager) {
+                return array_merge(
+                    $rawType->getInterfaces(),
+                    [$manager->getType('VersionInterface')]
+                );
             }
         ]);
 
